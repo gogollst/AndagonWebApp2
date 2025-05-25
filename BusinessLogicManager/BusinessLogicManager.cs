@@ -19,6 +19,7 @@ namespace YourNamespace.Logic
         private readonly DBManager<BusinessObjects.TravelRequest> _travelRequestManager;
         private readonly DBManager<BusinessObjects.Document> _documentManager;
         private readonly DBManager<BusinessObjects.ApprovalWorkflow> _workflowManager;
+        private readonly DBManager<BusinessObjects.UserAccount> _userAccountManager;
 
         // Konstruktor – Initialisierung mit Collection-Namen für MongoDB
         public BusinessLogicManager(string dbName, string connectionString = "mongodb://localhost:27017")
@@ -34,7 +35,24 @@ namespace YourNamespace.Logic
             _travelRequestManager = new(dbName, "TravelRequests", connectionString);
             _documentManager = new(dbName, "Documents", connectionString);
             _workflowManager = new(dbName, "ApprovalWorkflows", connectionString);
+            _userAccountManager = new(dbName, "UserAccounts", connectionString);
         }
+
+        #region UserAccounts
+
+        public async Task<BusinessObjects.UserAccount?> GetUserByEmailAsync(string email)
+            => (await _userAccountManager.FindAsync(Builders<BusinessObjects.UserAccount>.Filter.Eq(u => u.NormalizedEmail, email.ToUpper()))).FirstOrDefault();
+
+        public async Task<BusinessObjects.UserAccount?> GetUserByIdAsync(string id)
+            => await _userAccountManager.GetByIdAsync(id);
+
+        public async Task CreateUserAsync(BusinessObjects.UserAccount user)
+            => await _userAccountManager.InsertAsync(user);
+
+        public async Task UpdateUserAsync(BusinessObjects.UserAccount user)
+            => await _userAccountManager.UpdateAsync(user.Id.ToString(), user);
+
+        #endregion
 
         #region Mitarbeiterverwaltung
 
